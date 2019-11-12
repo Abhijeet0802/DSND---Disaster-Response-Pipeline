@@ -44,6 +44,16 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    temp = df.drop(['id','message','original','genre'], axis=1)
+    
+    #Finding Distribution of Categories
+    cat_counts = temp.sum()
+    cat_names = list(cat_counts.index)
+    
+    #Finding Top 10 Categories by Proportions
+    cat_props = (cat_counts /cat_counts.sum()).sort_values(ascending = False)[:10]
+    cat_prop_names = list(cat_props.index)
+       
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -64,13 +74,53 @@ def index():
                     'title': "Genre"
                 }
             }
-        }
+        },
+    
+        {
+            'data': [
+                Bar(
+                    x=cat_names,
+                    y=cat_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category"
+                }
+            }
+        },
+        
+        {
+            'data': [
+                Bar(
+                    x=cat_prop_names,
+                    y=cat_props
+                )
+            ],
+
+            'layout': {
+                'title': 'Top 10 Categories and their Proportions',
+                'yaxis': {
+                    'title': "Proportion"
+                },
+                'xaxis': {
+                    'title': "Category"
+                }
+            }
+        }          
     ]
+
     
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
-    
+
+        
     # render web page with plotly graphs
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
 
